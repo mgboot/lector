@@ -179,8 +179,12 @@ header h1 {
 .section-number {
   font-weight: 700;
   color: #888;
-  margin-right: 0.25rem;
-  font-size: 0.9rem;
+  margin-right: 0.15rem;
+  font-size: 0.75rem;
+}
+
+.paragraph-break {
+  height: 1em;
 }
 
 /* ── Loading Indicator ───────────────────────────── */

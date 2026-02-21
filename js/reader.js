@@ -80,14 +80,16 @@ function parseMorph(morphStr) {
  */
 export function tokenize(text) {
   const tokens = [];
-  // Match words (Latin letters including macrons) or non-word chunks
-  const regex = /([A-Za-zÀ-ÿ]+)|([^A-Za-zÀ-ÿ]+)/g;
+  // Match words, section numbers, or non-word/non-digit chunks
+  const regex = /([A-Za-zÀ-ÿ]+)|(\d+)|([^A-Za-zÀ-ÿ\d]+)/g;
   let match;
   while ((match = regex.exec(text)) !== null) {
     if (match[1]) {
       tokens.push({ type: "word", value: match[1] });
+    } else if (match[2]) {
+      tokens.push({ type: "section-number", value: match[2] });
     } else {
-      tokens.push({ type: "other", value: match[2] });
+      tokens.push({ type: "other", value: match[3] });
     }
   }
   return tokens;
@@ -109,8 +111,24 @@ export function renderTokens(container, tokens) {
       span.dataset.end = charOffset + token.value.length;
       span.addEventListener("click", () => onWordClick(span));
       container.appendChild(span);
+    } else if (token.type === "section-number") {
+      const sup = document.createElement("sup");
+      sup.className = "section-number";
+      sup.textContent = token.value;
+      container.appendChild(sup);
     } else {
-      container.appendChild(document.createTextNode(token.value));
+      // Split on newlines to insert paragraph breaks
+      const parts = token.value.split("\n");
+      for (let i = 0; i < parts.length; i++) {
+        if (i > 0) {
+          const spacer = document.createElement("div");
+          spacer.className = "paragraph-break";
+          container.appendChild(spacer);
+        }
+        if (parts[i]) {
+          container.appendChild(document.createTextNode(parts[i]));
+        }
+      }
     }
     charOffset += token.value.length;
   }
