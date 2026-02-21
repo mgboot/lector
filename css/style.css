@@ -1,0 +1,360 @@
+/* ── Reset & Base ─────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+body {
+  font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  color: #2b2b2b;
+  background: #faf8f4;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ──────────────────────────────────────── */
+header {
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+header h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #555;
+}
+
+#text-selector {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  color: #2b2b2b;
+  cursor: pointer;
+  outline: none;
+}
+
+#text-selector:focus {
+  border-color: #b5a88a;
+}
+
+/* ── Reader Layout ───────────────────────────────── */
+.reader {
+  display: flex;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.text-panel {
+  flex: 1;
+  padding: 2rem 3rem;
+  overflow-y: auto;
+}
+
+/* ── Sidebar ─────────────────────────────────────── */
+.sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  border-left: 1px solid #ddd;
+  padding: 2rem 1.5rem;
+  background: #f5f3ef;
+  overflow-y: auto;
+}
+
+.sidebar-placeholder {
+  color: #999;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.sidebar-content h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: #3a3a3a;
+}
+
+.sidebar-content h3 {
+  font-size: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.sidebar-content .root {
+  font-style: italic;
+  color: #555;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-content .pos-tag {
+  display: inline-block;
+  background: #e8e4dd;
+  color: #5a5a5a;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 3px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sidebar-content .meanings {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.5rem;
+}
+
+.sidebar-content .meanings li {
+  padding: 0.2rem 0;
+  border-bottom: 1px solid #e8e4dd;
+  font-size: 0.95rem;
+}
+
+.sidebar-content .meanings li:last-child {
+  border-bottom: none;
+}
+
+.sidebar-content .morphology {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 0.75rem;
+}
+
+.sidebar-content .morphology span {
+  display: inline-block;
+  margin-right: 0.75rem;
+}
+
+.sidebar-content .not-found {
+  color: #999;
+  font-style: italic;
+}
+
+/* ── Word Spans ──────────────────────────────────── */
+#text-content {
+  font-size: 1.1rem;
+  line-height: 1.9;
+}
+
+.word {
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background-color 0.12s ease;
+}
+
+.word:hover {
+  background-color: #e8dfc9;
+}
+
+.word.active {
+  background-color: #d4c9ad;
+}
+
+.section-number {
+  font-weight: 700;
+  color: #888;
+  margin-right: 0.25rem;
+  font-size: 0.9rem;
+}
+
+/* ── Loading Indicator ───────────────────────────── */
+.loading {
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+  padding: 1rem;
+}
+
+.loading progress {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  height: 6px;
+  appearance: none;
+}
+
+.loading progress::-webkit-progress-bar {
+  background: #e8e4dd;
+  border-radius: 3px;
+}
+
+.loading progress::-webkit-progress-value {
+  background: #b5a88a;
+  border-radius: 3px;
+}
+
+/* ── Chat Panel ──────────────────────────────────── */
+.chat-panel {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  border-top: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  height: 320px;
+  flex-shrink: 0;
+  background: #f9f7f3;
+}
+
+.chat-header {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  padding: 0.5rem 1.5rem;
+  border-bottom: 1px solid #e8e4dd;
+  flex-shrink: 0;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chat-placeholder {
+  color: #999;
+  font-style: italic;
+  font-size: 0.9rem;
+  align-self: center;
+  margin-top: 2rem;
+}
+
+.chat-bubble {
+  max-width: 75%;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.chat-bubble.user {
+  align-self: flex-end;
+  background: #d4c9ad;
+  color: #2b2b2b;
+  border-bottom-right-radius: 2px;
+}
+
+.chat-bubble.assistant {
+  align-self: flex-start;
+  background: #e8e4dd;
+  color: #2b2b2b;
+  border-bottom-left-radius: 2px;
+}
+
+.chat-input-bar {
+  display: flex;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid #e8e4dd;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.chat-input-bar input {
+  flex: 1;
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  background: #fff;
+}
+
+.chat-input-bar input:focus {
+  border-color: #b5a88a;
+}
+
+.chat-input-bar button {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.5rem 1.25rem;
+  background: #b5a88a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.chat-input-bar button:hover {
+  background: #a09070;
+}
+
+.chat-input-bar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-status {
+  color: #999;
+  font-style: italic;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.chat-bubble.thinking {
+  color: #999;
+  font-style: italic;
+}
+
+/* ── Markdown inside assistant bubbles ───────────── */
+.chat-bubble.assistant p {
+  margin: 0.4em 0;
+}
+
+.chat-bubble.assistant p:first-child {
+  margin-top: 0;
+}
+
+.chat-bubble.assistant p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-bubble.assistant ul,
+.chat-bubble.assistant ol {
+  margin: 0.3em 0;
+  padding-left: 1.4em;
+}
+
+.chat-bubble.assistant li {
+  margin: 0.15em 0;
+}
+
+.chat-bubble.assistant code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  font-size: 0.88em;
+  font-family: "Consolas", "Menlo", monospace;
+}

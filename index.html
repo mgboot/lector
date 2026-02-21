@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="la">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lector</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Lector</h1>
+    <select id="text-selector" aria-label="Choose a text"></select>
+  </header>
+
+  <div class="reader">
+    <main class="text-panel" id="text-panel">
+      <div id="loading-indicator" class="loading" hidden>
+        Loading word data…
+        <progress id="loading-progress" max="100" value="0"></progress>
+      </div>
+      <article id="text-content"></article>
+    </main>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-placeholder">Click a word to see its definition.</div>
+      <div class="sidebar-content" id="sidebar-content" hidden></div>
+    </aside>
+  </div>
+
+  <section class="chat-panel" id="chat-panel">
+    <h2 class="chat-header">Latin Tutor</h2>
+    <div class="chat-messages" id="chat-messages">
+      <div class="chat-placeholder">Ask a question about the text or a selected word…</div>
+    </div>
+    <form class="chat-input-bar" id="chat-form">
+      <input type="text" id="chat-input" placeholder="Type your question…" autocomplete="off">
+      <button type="submit" id="chat-send">Send</button>
+    </form>
+  </section>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
