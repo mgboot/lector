@@ -18,13 +18,7 @@ async function init() {
     selector.appendChild(opt);
   }
 
-  // Make chat usable immediately
-  initChat();
-
-  // Load the first text
-  await loadText(manifest[0]);
-
-  // Handle dropdown changes
+  // Handle dropdown changes (attach before loading so it's responsive immediately)
   selector.addEventListener("change", async () => {
     const entry = manifest.find((e) => e.file === selector.value);
     if (entry) {
@@ -32,6 +26,12 @@ async function init() {
       await loadText(entry);
     }
   });
+
+  // Load the first text before initialising chat so the health-check
+  // (which may block the server event loop) doesn't stall static-file serving.
+  await loadText(manifest[0]);
+
+  initChat();
 }
 
 async function loadText(entry) {

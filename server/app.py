@@ -1,5 +1,6 @@
 """FastAPI server exposing the Latin tutor agent as a chat endpoint."""
 
+import asyncio
 import logging
 import pathlib
 import uuid
@@ -111,7 +112,7 @@ class AnalyzeRequest(BaseModel):
 
 
 @app.post("/api/analyze")
-async def analyze(req: AnalyzeRequest):
+def analyze(req: AnalyzeRequest):
     """Run LatinCy on the passage and return per-token annotations."""
     try:
         nlp = _get_nlp()
@@ -138,7 +139,7 @@ async def analyze(req: AnalyzeRequest):
 @app.post("/api/chat")
 async def chat(req: ChatRequest):
     try:
-        agent = _get_agent()
+        agent = await asyncio.to_thread(_get_agent)
     except Exception as e:
         logger.exception("Failed to create agent")
         return StreamingResponse(
@@ -175,7 +176,7 @@ async def chat(req: ChatRequest):
 
 
 @app.get("/api/health")
-async def health():
+def health():
     """Quick check that the agent can be created and credentials are valid."""
     try:
         _get_agent()
