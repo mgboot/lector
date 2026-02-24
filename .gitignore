@@ -27,3 +27,9 @@ node_modules/
 
 # spaCy models (large, installed via pip)
 la_core_web_lg/
+
+# Textbook search index (large binary files, built by build_local_db.py)
+server/data/
+
+# Textbook source files (copyrighted PDFs)
+server/textbooks/

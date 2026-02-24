@@ -10,7 +10,7 @@ let chatReady = false;
 // These are set by the reader module when a word is clicked
 let selectedWord = null;
 let selectedWordData = null;
-let passageText = null;
+let textId = null;
 let textTitle = null;
 
 export function setSelectedWord(word, data) {
@@ -18,8 +18,8 @@ export function setSelectedWord(word, data) {
   selectedWordData = data;
 }
 
-export function setPassageText(text) {
-  passageText = text;
+export function setTextId(id) {
+  textId = id;
 }
 
 export function setTextTitle(title) {
@@ -30,7 +30,7 @@ export function resetChat() {
   sessionId = null;
   selectedWord = null;
   selectedWordData = null;
-  passageText = null;
+  textId = null;
   textTitle = null;
 
   const container = document.getElementById("chat-messages");
@@ -51,6 +51,9 @@ async function checkHealth() {
     if (data.status === "ok") {
       chatReady = true;
       clearStatus();
+      if (data.search_available === false) {
+        setStatus("Tutor connected, but textbook search is unavailable (index not found).");
+      }
     } else {
       setStatus(`Tutor unavailable: ${data.detail || "unknown error"}`);
     }
@@ -114,7 +117,7 @@ function addMessage(role, text) {
 
 async function sendMessage(message) {
   const context = {};
-  if (passageText) context.text = passageText;
+  if (textId) context.textId = textId;
   if (textTitle) context.textTitle = textTitle;
   if (selectedWord) {
     context.selectedWord = selectedWord;
@@ -125,6 +128,10 @@ async function sendMessage(message) {
   const body = { message, context };
   if (sessionId) body.session_id = sessionId;
 
+  // Show thinking indicator
+  const bubble = addMessage("assistant", "…");
+  bubble.classList.add("thinking");
+
   let res;
   try {
     res = await fetch(CHAT_API, {
@@ -133,49 +140,41 @@ async function sendMessage(message) {
       body: JSON.stringify(body),
     });
   } catch (err) {
-    addMessage("assistant", "Unable to reach the tutor server. Is it running?");
+    bubble.textContent = "Unable to reach the tutor server. Is it running?";
+    bubble.classList.remove("thinking");
     return;
   }
 
   if (!res.ok) {
-    addMessage("assistant", `Server error: ${res.status}`);
+    bubble.textContent = `Server error: ${res.status}`;
+    bubble.classList.remove("thinking");
     return;
   }
 
-  // Stream the response
-  const bubble = addMessage("assistant", "Thinking…");
-  bubble.classList.add("thinking");
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let firstChunk = true;
-  let fullText = "";
+  const data = await res.json();
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    let text = decoder.decode(value, { stream: true });
+  if (data.session_id) sessionId = data.session_id;
 
-    // First chunk contains the session_id JSON line
-    if (firstChunk) {
-      const nlIdx = text.indexOf("\n");
-      if (nlIdx !== -1) {
-        try {
-          const meta = JSON.parse(text.slice(0, nlIdx));
-          if (meta.session_id) sessionId = meta.session_id;
-        } catch { /* ignore parse errors */ }
-        text = text.slice(nlIdx + 1);
-      }
-      firstChunk = false;
-    }
-
-    fullText += text;
-    bubble.innerHTML = renderMarkdown(fullText);
-    bubble.classList.remove("thinking");
+  // Render tool-call indicators before the reply
+  if (data.tool_calls && data.tool_calls.length > 0) {
     const container = document.getElementById("chat-messages");
-    container.scrollTop = container.scrollHeight;
+    // Insert tool indicators just before the thinking bubble
+    for (const tc of data.tool_calls) {
+      const indicator = document.createElement("div");
+      indicator.className = "tool-indicator";
+      indicator.innerHTML = `<span class="tool-icon">${tc.icon || "🔧"}</span><span>${tc.label || tc.tool_call}</span>`;
+      container.insertBefore(indicator, bubble);
+    }
   }
 
-  if (!fullText) {
+  // Render the reply
+  bubble.classList.remove("thinking");
+  if (data.reply) {
+    bubble.innerHTML = renderMarkdown(data.reply);
+  } else {
     bubble.textContent = "The tutor didn't respond. Check that the server is running and configured correctly.";
   }
+
+  const container = document.getElementById("chat-messages");
+  container.scrollTop = container.scrollHeight;
 }

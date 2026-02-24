@@ -1,7 +1,7 @@
 import { tokenize, renderTokens, uniqueWords, setAnalysisData, clearAnalysisData } from "./reader.js";
 import { fetchAllWords, analyzeText } from "./api.js";
 import { hasWord, setWord } from "./store.js";
-import { initChat, setPassageText, setTextTitle, resetChat } from "./chat.js";
+import { initChat, setTextId, setTextTitle, resetChat } from "./chat.js";
 
 let manifest = [];
 
@@ -39,7 +39,7 @@ async function loadText(entry) {
   const text = await res.text();
 
   // Update chat context
-  setPassageText(text);
+  setTextId(entry.id);
   setTextTitle(entry.title);
 
   // Clear previous analysis data

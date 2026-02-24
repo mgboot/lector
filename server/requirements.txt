@@ -4,3 +4,8 @@ uvicorn[standard]
 azure-identity
 python-dotenv
 spacy>=3.7
+faiss-cpu>=1.7.0
+numpy>=1.24.0
+openai>=1.40.0
+pymupdf>=1.24.0
+requests>=2.31.0

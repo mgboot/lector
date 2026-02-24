@@ -59,7 +59,7 @@ function lookupAnalysis(start, end) {
 
 /**
  * Parse a spaCy morph string like "Case=Acc|Gender=Neut|Number=Plur"
- * into an array of human-readable labels.
+ * into an array of { label, category } objects for colored tag rendering.
  */
 function parseMorph(morphStr) {
   if (!morphStr) return [];
@@ -69,7 +69,7 @@ function parseMorph(morphStr) {
     if (!key || !val) continue;
     const labelMap = MORPH_LABELS[key];
     const label = labelMap ? (labelMap[val] || val) : val;
-    parts.push(label);
+    parts.push({ label, category: key.toLowerCase() });
   }
   return parts;
 }
@@ -242,7 +242,7 @@ function renderSidebar(displayForm, data, analysis) {
 }
 
 /**
- * Render the LatinCy context-aware analysis section.
+ * Render the LatinCy context-aware analysis section with colored morph tags.
  */
 function renderContextAnalysis(analysisTokens) {
   let html = `<h3>Context Analysis</h3><div class="morphology">`;
@@ -254,7 +254,11 @@ function renderContextAnalysis(analysisTokens) {
     }
     const morphParts = parseMorph(t.morph);
     if (morphParts.length > 0) {
-      html += `<div>${morphParts.join(", ")}</div>`;
+      html += `<div class="morph-tags">`;
+      for (const { label, category } of morphParts) {
+        html += `<span class="morph-tag morph-${category}">${label}</span>`;
+      }
+      html += `</div>`;
     }
   }
   html += `</div>`;

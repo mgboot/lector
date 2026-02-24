@@ -151,6 +151,34 @@ header h1 {
   margin-right: 0.75rem;
 }
 
+/* ── Morph Tags (colored pills for grammatical features) ── */
+.morph-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+}
+
+.morph-tag {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.morph-case    { background: #e3edf7; color: #2c5f8a; }
+.morph-number  { background: #e3f2e8; color: #2a7a4b; }
+.morph-gender  { background: #f0e3f7; color: #7a2a8a; }
+.morph-tense   { background: #fdf0e0; color: #8a6a2a; }
+.morph-mood    { background: #fde3e3; color: #8a2a2a; }
+.morph-voice   { background: #e0f0ef; color: #2a7a7a; }
+.morph-person  { background: #ececec; color: #5a5a5a; }
+.morph-degree  { background: #fdf5e0; color: #8a7a2a; }
+.morph-aspect  { background: #e8e0f0; color: #5a3a8a; }
+.morph-verbform { background: #f0ece3; color: #6a5a3a; }
+
 .sidebar-content .not-found {
   color: #999;
   font-style: italic;
@@ -361,4 +389,25 @@ header h1 {
   border-radius: 3px;
   font-size: 0.88em;
   font-family: "Consolas", "Menlo", monospace;
+}
+
+/* ── Tool Call Indicators ────────────────────────── */
+.tool-indicator {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.7rem;
+  background: #eef2f7;
+  border: 1px solid #d0dae5;
+  border-radius: 14px;
+  font-size: 0.78rem;
+  color: #5a7394;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.tool-indicator .tool-icon {
+  font-style: normal;
+  font-size: 0.85rem;
 }

@@ -5,14 +5,13 @@ import logging
 import pathlib
 import uuid
 
-import spacy
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from agent import create_agent
+from agent import create_agent, tool_notifier, _search_available
+from nlp import get_nlp
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +27,6 @@ app.add_middleware(
 # In-memory session store: session_id → AgentSession
 _sessions: dict[str, object] = {}
 _agent = None
-_nlp = None
 
 
 def _get_agent():
@@ -36,15 +34,6 @@ def _get_agent():
     if _agent is None:
         _agent = create_agent()
     return _agent
-
-
-def _get_nlp():
-    """Lazy-load the LatinCy spaCy model."""
-    global _nlp
-    if _nlp is None:
-        _nlp = spacy.load("la_core_web_lg")
-        _nlp.max_length = 2_500_000
-    return _nlp
 
 
 class ChatRequest(BaseModel):
@@ -65,6 +54,9 @@ def _build_user_message(req: ChatRequest) -> str:
 
     if ctx.get("textTitle"):
         parts.append(f"[Currently reading: {ctx['textTitle']}]")
+
+    if ctx.get("textId"):
+        parts.append(f"[Text ID: {ctx['textId']}]")
 
     if ctx.get("selectedWord"):
         parts.append(f"[Selected word: {ctx['selectedWord']}]")
@@ -96,13 +88,6 @@ def _build_user_message(req: ChatRequest) -> str:
                     if forms:
                         parts.append(f"[Forms: {', '.join(forms)}]")
 
-    if ctx.get("text"):
-        # Send a brief excerpt so the model has passage context
-        text = ctx["text"]
-        if len(text) > 1500:
-            text = text[:1500] + "…"
-        parts.append(f"[Passage context: {text}]")
-
     parts.append(req.message)
     return "\n".join(parts)
 
@@ -115,7 +100,7 @@ class AnalyzeRequest(BaseModel):
 def analyze(req: AnalyzeRequest):
     """Run LatinCy on the passage and return per-token annotations."""
     try:
-        nlp = _get_nlp()
+        nlp = get_nlp()
     except Exception as e:
         logger.exception("Failed to load LatinCy model")
         return {"error": f"Could not load LatinCy model: {e}"}
@@ -142,10 +127,7 @@ async def chat(req: ChatRequest):
         agent = await asyncio.to_thread(_get_agent)
     except Exception as e:
         logger.exception("Failed to create agent")
-        return StreamingResponse(
-            iter([f"[Error] Could not initialize the AI tutor: {e}\n"]),
-            media_type="text/plain",
-        )
+        return {"reply": f"[Error] Could not initialize the AI tutor: {e}", "session_id": "", "tool_calls": []}
 
     # Resolve or create session
     sid = req.session_id or str(uuid.uuid4())
@@ -154,25 +136,28 @@ async def chat(req: ChatRequest):
             _sessions[sid] = agent.create_session()
         except Exception as e:
             logger.exception("Failed to create session")
-            return StreamingResponse(
-                iter([f"[Error] Could not create a session: {e}\n"]),
-                media_type="text/plain",
-            )
+            return {"reply": f"[Error] Could not create a session: {e}", "session_id": sid, "tool_calls": []}
     session = _sessions[sid]
 
     user_msg = _build_user_message(req)
 
-    async def stream_response():
-        yield f'{{"session_id": "{sid}"}}\n'
-        try:
-            async for chunk in agent.run(user_msg, session=session, stream=True):
-                if chunk.text:
-                    yield chunk.text
-        except Exception as e:
-            logger.exception("Error during agent streaming")
-            yield f"\n[Error] The AI service encountered a problem: {e}"
+    # Clear any stale tool-call records
+    tool_notifier.clear()
 
-    return StreamingResponse(stream_response(), media_type="text/plain")
+    try:
+        result = await agent.run(user_msg, session=session)
+        reply = result.text if hasattr(result, 'text') and result.text else ""
+    except Exception as e:
+        logger.exception("Error during agent run")
+        reply = f"[Error] The AI service encountered a problem: {e}"
+
+    calls = tool_notifier.get_calls()
+
+    return {
+        "session_id": sid,
+        "tool_calls": calls,
+        "reply": reply.strip() if reply else "The tutor didn't respond. Check that the server is running and configured correctly.",
+    }
 
 
 @app.get("/api/health")
@@ -180,7 +165,10 @@ def health():
     """Quick check that the agent can be created and credentials are valid."""
     try:
         _get_agent()
-        return {"status": "ok"}
+        return {
+            "status": "ok",
+            "search_available": _search_available,
+        }
     except Exception as e:
         logger.exception("Health check failed")
         return {"status": "error", "detail": str(e)}
